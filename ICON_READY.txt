@@ -1,0 +1,149 @@
+🎉 IKONA A ALIAS - HOTOVO!
+===========================
+
+## ✅ CO BOLO VYTVORENÉ:
+
+### 1️⃣ ALIAS "naklady" ✨
+
+Priamo v termináli:
+```bash
+$ source ~/.bashrc
+$ naklady
+```
+
+**Umiestnenie:** `~/.bashrc`  
+**Status:** ✅ AKTÍVNY
+
+---
+
+### 2️⃣ DESKTOP IKONA (Linux/GNOME/KDE) 🖼️
+
+**Súbory:**
+- `naklady.desktop` - Desktop konfigurácia
+- `naklady-icon.svg` - Modernná ikona s eurom
+
+**Inštalácia:**
+```bash
+./install-icon.sh
+```
+
+**Spustenie:**
+- V termináli: `naklady`
+- Aplikačné menu: Hľadaj "Sledovanie Nákladov"
+- Kliknutie na ikonu: Spustí aplikáciu
+
+**Status:** ✅ INŠTALOVANÁ
+
+---
+
+### 3️⃣ WINDOWS SKRATKA 🪟
+
+**Súbor:** `naklady.cmd`
+
+**Ako používať:**
+1. Skopíruj súbor na plochu
+2. Pravý klik → "Odoslať na" → "Plocha (vytvoriť skratku)"
+3. Dvaklik na skratku = spustenie aplikácie
+
+**Alternatívne - PowerShell alias:**
+```powershell
+Set-Alias -Name naklady -Value 'C:\Users\[User]\Aplikácie\expense-tracker\naklady.cmd'
+```
+
+**Status:** ✅ PRIPRAVENÁ
+
+---
+
+## 🚀 RÝCHLY ŠTART:
+
+### Linux/macOS Terminal:
+```bash
+source ~/.bashrc
+naklady
+```
+
+### Windows Terminal/PowerShell:
+```powershell
+naklady
+```
+
+### Windows - Dvaklik:
+- Skratka na ploche s ikonou
+
+### Aplikačné Menu (Linux):
+- Hľadaj: "Sledovanie Nákladov"
+- Kategória: Finance
+
+---
+
+## 📋 SÚBORY:
+
+| Súbor | Popis | Status |
+|-------|-------|--------|
+| `naklady.desktop` | Linux desktop | ✅ |
+| `naklady-icon.svg` | Ikona (256x256) | ✅ |
+| `naklady.cmd` | Windows skratka | ✅ |
+| `install-icon.sh` | Inštalácia | ✅ |
+| `INSTALL_ICON.md` | Podrobný návod | ✅ |
+
+---
+
+## 🎨 IKONA:
+
+**Vlastnosti:**
+- 💜 Purpurový gradient (667eea → 764ba2)
+- 💶 Euro symbol
+- 🎯 Jednoduché a jasné
+- 📱 Vhodná na všetky rozlíšenia
+
+**Format:** SVG (škálovateľný bez straty kvality)
+
+---
+
+## 🔧 INŠTALÁCIA:
+
+### Prvý Krát:
+
+Linux/macOS:
+```bash
+cd /home/narbon/Aplikácie/expense-tracker
+./install-icon.sh
+```
+
+Potom:
+```bash
+source ~/.bashrc  # Aktivuj alias
+naklady           # Spusti aplikáciu!
+```
+
+### Windows:
+
+1. Otvori Prieskumník
+2. Prejdi do: `C:\Users\[tvoje_meno]\Aplikácie\expense-tracker`
+3. Klikni na `naklady.cmd` s pravým tlačidlom
+4. "Odoslať na" → "Plocha (vytvoriť skratku)"
+5. Hotovo! 🎉
+
+---
+
+## ✨ VÝSLEDOK:
+
+**Pred:**
+```
+$ /home/narbon/Aplikácie/expense-tracker/start.sh
+```
+
+**Po:**
+```
+$ naklady
+```
+
+Alebo jednoduchého kliknutia na plochu! 🖱️
+
+---
+
+**Vytvorené:** 5. november 2025  
+**Verzia:** 1.0  
+**Status:** ✅ HOTOVO!
+
+🎊 Viac detailov v `INSTALL_ICON.md`

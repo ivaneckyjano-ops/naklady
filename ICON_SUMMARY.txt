@@ -1,0 +1,73 @@
+📱 IKONA A ALIAS - ZHRNUTIE
+=============================
+
+✅ ČÍTALO BYŤ VYTVORENÉ:
+
+1. 🎯 ALIAS "naklady"
+   - Príkaz: naklady
+   - Umiestnenie: ~/.bashrc
+   - Status: ✅ AKTÍVNY
+
+2. 🖼️ DESKTOP IKONA
+   - Súbor: naklady.desktop
+   - Ikona: naklady-icon.svg
+   - Umiestnenie: ~/.local/share/applications/
+   - Status: ✅ INŠTALOVANÁ
+
+3. 🪟 WINDOWS SKRATKA
+   - Súbor: naklady.cmd
+   - Umiestnenie: C:\Users\[User]\Aplikácie\expense-tracker\
+   - Status: ✅ PRIPRAVENÁ
+
+---
+
+🚀 AKO POUŽÍVAŤ:
+
+1. V LINUXE/macOS TERMINÁLI:
+   $ source ~/.bashrc
+   $ naklady
+
+2. V APLIKAČNOM MENU (LINUX):
+   - Hľadaj: "Sledovanie Nákladov"
+   - Ikona: 💜 (purpurová s eurom)
+
+3. NA WINDOWSE:
+   - Spusti: naklady.cmd
+   - Alebo: PowerShell - naklady
+
+---
+
+📂 NOVÉ SÚBORY:
+
+• naklady.desktop - Desktop aplikácia pre Linux
+• naklady-icon.svg - Ikona aplikácie (256x256)
+• naklady.cmd - Skratka pre Windows
+• install-icon.sh - Inštalačný skript
+• INSTALL_ICON.md - Podrobný návod
+
+---
+
+💡 INŠTALÁCIA:
+
+Aby všetko fungovalo:
+
+1. Spusti (Linux):
+   /home/narbon/Aplikácie/expense-tracker/install-icon.sh
+
+2. Alebo manuálne (Linux):
+   mkdir -p ~/.local/share/icons/hicolor/256x256/apps
+   cp naklady-icon.svg ~/.local/share/icons/hicolor/256x256/apps/
+   cp naklady.desktop ~/.local/share/applications/
+
+3. Na Windows:
+   - Skopíruj naklady.cmd na plochu
+   - Alebo: Pravý klik → "Odoslať na" → "Plocha"
+
+---
+
+✨ TO JE VŠETKO!
+
+Teraz môžeš spustiť aplikáciu príkazom:
+   $ naklady
+
+Alebo v aplikačnom menu!

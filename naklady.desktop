@@ -1,0 +1,14 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=Sledovanie Nákladov
+Name[sk]=Sledovanie Nákladov
+Comment=Aplikácia na sledovanie domácich nákladov
+Comment[sk]=Spravuj svoje domáce výdavky
+Icon=naklady
+Exec=/home/narbon/Aplikácie/expense-tracker/naklady-app
+Path=/home/narbon/Aplikácie/expense-tracker
+Terminal=false
+Categories=Office;Finance;
+StartupNotify=true
+Keywords=náklady;výdavky;financie;

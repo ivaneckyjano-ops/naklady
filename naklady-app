@@ -1,0 +1,7 @@
+#!/bin/bash
+cd /home/narbon/Aplikácie/expense-tracker
+pkill -f "python.*run.py" 2>/dev/null || true
+sleep 1
+nohup ./venv/bin/python run.py > /tmp/naklady.log 2>&1 &
+sleep 3
+firefox "http://127.0.0.1:5004" &>/dev/null &

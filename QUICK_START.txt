@@ -1,0 +1,65 @@
+🚀 RÝCHLY START
+===============
+
+## 1️⃣ SPUSTENIE APLIKÁCIE
+
+### 🐧 Na Linuxe / macOS:
+
+```bash
+cd /home/narbon/Aplikácie/expense-tracker
+chmod +x start.sh
+./start.sh
+```
+
+### 🪟 Na Windowse:
+
+```cmd
+cd C:\Users\[tvoje_meno]\Aplikácie\expense-tracker
+start.bat
+```
+
+## 2️⃣ OTVORENIE APLIKÁCIE
+
+Keď vidíš v termináli:
+```
+Running on http://127.0.0.1:5004
+```
+
+Otvor v prehliadači: **http://localhost:5004**
+
+## 3️⃣ PRVÉ KROKY
+
+✅ Aplikácia automaticky vytvorí kategórie (Dom, Auto, Záhrada, atď.)
+✅ Klikni na "Domov" stránke
+✅ Vyplň prvý výdavok:
+   - Kategória: Výber z ponuky
+   - Suma: Napr. 50.00
+   - Popis: Napr. "Nákup v Tescu"
+   - Dátum: Dnes alebo ľubovoľný dátum
+
+✅ Klikni "Pridaj Výdavok"
+
+## 4️⃣ PREHLIADANIE DÁT
+
+📊 **Domov**: Všetky tvoje výdavky
+📈 **Štatistika**: Grafy a analýzy
+📉 **Porovnanie**: Porovnaj roky
+
+## 5️⃣ ZASTAVENIE APLIKÁCIE
+
+Stlač: **Ctrl+C** v termináli
+
+---
+
+## ⚠️ PROBLÉMY?
+
+| Problém | Riešenie |
+|---------|----------|
+| Python nenájdený | Inštaluj Python 3.7+ z python.org |
+| Port 5000 je obsadený | Zmení port v `run.py` |
+| Dáta sa nestratili | Všetko je v `expenses.db` |
+| Aplikácia nereaguje | Reštartuj (Ctrl+C a znova spusti) |
+
+---
+
+Viac informácií: Pozri `README.md` a `USAGE.md`

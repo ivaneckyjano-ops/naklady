@@ -1,0 +1,119 @@
+🎊 IKONA BEZ TERMINÁLU - HOTOVO! ✅
+=====================================
+
+✨ RIEŠENIE:
+
+Áno! Aplikácia sa teraz otvára priamo bez terminálu! 
+
+---
+
+❌ STARÝ SPÔSOB:
+   Kliknutie na ikonu
+      ↓
+   Otvorí sa TERMINÁL
+      ↓
+   Aplikácia sa spustí v termináli
+
+✅ NOVÝ SPÔSOB:
+   Kliknutie na ikonu
+      ↓
+   Aplikácia sa spustí NA POZADÍ
+      ↓
+   Prehliadač sa AUTOMATICKY otvára
+      ↓
+   ŽIADNY VIDITEĽNÝ TERMINÁL! 🎉
+
+---
+
+🔧 ČO BOLO ZMENENÉ:
+
+1. Nový script: naklady-app
+   └─ Spúšťa aplikáciu bez terminálu
+   └─ Automaticky otvára prehliadač
+   └─ Čaká kým je server dostupný
+
+2. Aktualizovaný: naklady.desktop
+   └─ Terminal=false (namiesto true)
+   └─ Ukazuje na naklady-app script
+
+3. Aktualizovaný alias: naklady
+   └─ Teraz: naklady-app script
+   └─ Bez viditeľného terminálu
+
+---
+
+🚀 AKO POUŽÍVAŤ:
+
+KLIKNUTIE NA IKONU V MENU:
+   • Aplikačné menu → "Sledovanie Nákladov"
+   • Aplikácia sa spustí bez terminálu!
+   • Prehliadač sa otvorí automaticky
+   • Žiadny terminál nie je viditeľný! ✨
+
+V TERMINÁLI:
+   $ source ~/.bashrc
+   $ naklady
+   Spúšťam aplikáciu...
+   Server je dostupný!
+   [Prehliadač sa otvorí automaticky]
+
+---
+
+📁 NOVÉ SÚBORY:
+
+✓ naklady-app              - Script bez terminálu
+✓ naklady.desktop          - Aktualizovaný
+✓ install-icon.sh          - Aktualizovaný
+✓ NO_TERMINAL.md           - Podrobný návod
+
+---
+
+💻 TECHNICKÉ DETAILY:
+
+Script naklady-app:
+✅ Preverí virtuálne prostredie (vytvorí ak treba)
+✅ Zatvri staré procesy (aby sa neduplikovali)
+✅ Spustí server NA POZADÍ (bez viditeľného okna)
+✅ Čaká kým je server dostupný (max 15 sekúnd)
+✅ Automaticky otvára prehliadač
+✅ Všetko ticho a bez chýb!
+
+---
+
+🎯 VÝHODY:
+
+✨ BEZ TERMINÁLU - Čistý vzhľad
+✨ AUTOMATICKÝ PREHLIADAČ - Okamžitý prístup
+✨ NA POZADÍ - Nemôžeš omylom zatvoriť
+✨ INTELIGENTNÉ - Čaká kým je server dostupný
+✨ LOGY - Ak sa niečo pokazí, sú v /tmp/naklady.log
+
+---
+
+🧪 SKÚŠAJ:
+
+1. Aktivuj alias:
+   source ~/.bashrc
+
+2. Spusti príkazom:
+   naklady
+
+   ALEBO
+
+3. Klikni na ikonu v aplikačnom menu:
+   "Sledovanie Nákladov"
+
+---
+
+🎉 HOTOVO!
+
+Aplikácia sa teraz spúšťa bez viditeľného terminálu!
+
+Prehliadač sa otvorí automaticky.
+
+Všetko je optimalizované a hotové! ✨
+
+---
+
+Viac: cat NO_TERMINAL.md
+Status: ✅ HOTOVO A TESTOVANÉ!

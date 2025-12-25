@@ -1,0 +1,159 @@
+# 🎊 IKONA A ALIAS - HOTOVO! ✅
+
+Vytvára som pre vás možnosť spustenia aplikácie pomocou:
+1. ✨ Aliasu `naklady` v termináli
+2. 🖼️ Desktop ikony v aplikačnom menu
+3. 🪟 Windows skratky na ploche
+
+---
+
+## 🎯 SKÚŠOBNE HOTOVÉ:
+
+### ✅ Alias "naklady" - PRACUJE!
+```bash
+source ~/.bashrc
+naklady
+```
+**Status:** ✅ **FUNKČNÝ** - Testované!
+
+### ✅ Desktop Ikona - INŠTALOVANÁ!
+**Umiestnenie:** `~/.local/share/applications/naklady.desktop`  
+**Ikona:** `~/.local/share/icons/hicolor/256x256/apps/naklady.svg`  
+**Status:** ✅ **VIDITEĽNÁ** - V aplikačnom menu!
+
+### ✅ Windows Skratka - PRIPRAVENÁ!
+**Súbor:** `naklady.cmd`  
+**Status:** ✅ **HOTOVÁ** - Pripravená na kopíranie!
+
+---
+
+## 🚀 VOĽBY NA SPUSTENIE:
+
+### 1. Príkaz v Termináli (Linux/macOS)
+```bash
+naklady
+```
+Najrýchlejší spôsob! ⚡
+
+### 2. Aplikačné Menu (Linux/GNOME/KDE)
+- Hľadaj: "Sledovanie Nákladov"
+- Ikona: 💜 (purpurová)
+- Klikni a spustí sa aplikácia!
+
+### 3. Priamy Script (všade)
+```bash
+./start.sh           # Linux/macOS
+start.bat            # Windows
+```
+
+### 4. Windows Skratka
+- Skopíruj `naklady.cmd` na plochu
+- Dvaklik = spustenie
+
+---
+
+## 📝 NOVÉ SÚBORY:
+
+```
+/home/narbon/Aplikácie/expense-tracker/
+├── naklady.desktop      # Desktop konfigurácia
+├── naklady-icon.svg     # Ikona (purpurový gradient)
+├── naklady.cmd          # Windows skratka
+├── install-icon.sh      # Inštalačný skript
+├── INSTALL_ICON.md      # Podrobný návod
+├── ICON_SUMMARY.txt     # Zhrnutie
+└── ICON_READY.txt       # Status
+```
+
+---
+
+## 🎨 IKONA:
+
+**Vlastnosti:**
+- ✨ Moderný purpurový gradient
+- 💶 Euro symbol v strede
+- 🎯 Jednoduché a jasné
+- 📱 Vhodná na všetky rozlíšenia (256x256 SVG)
+
+---
+
+## 💻 POUŽITIE:
+
+### Aby Bol Alias Dostupný:
+
+**V NOVOM TERMINÁLI:**
+```bash
+source ~/.bashrc
+naklady
+```
+
+**Alebo PERMANENTNE:**
+- Zatvri a otvor nový terminál
+- Alias bude automaticky dostupný
+
+### V Aplikačnom Menu:
+
+1. Otvori Aplikačné Menu
+2. Vyhľadaj: "Sledovanie Nákladov"
+3. Klikni na ikonu
+4. Aplikácia sa spustí! 🚀
+
+---
+
+## 🔧 MANUÁLNA INŠTALÁCIA (ak je potrebné):
+
+### Linux:
+```bash
+# Ikonka
+mkdir -p ~/.local/share/icons/hicolor/256x256/apps
+cp naklady-icon.svg ~/.local/share/icons/hicolor/256x256/apps/
+
+# Desktop
+mkdir -p ~/.local/share/applications
+cp naklady.desktop ~/.local/share/applications/
+
+# Aktualizácia cache
+update-desktop-database ~/.local/share/applications/
+```
+
+### Windows:
+```cmd
+REM Skopíruj naklady.cmd na plochu
+copy naklady.cmd "%USERPROFILE%\Desktop\naklady.lnk"
+```
+
+---
+
+## ✨ SKÚŠANO A PRACUJE:
+
+- ✅ Alias `naklady` je funkčný v bashrc
+- ✅ Desktop súbor je v aplikačnom menu
+- ✅ Ikona je správne formátovaná (SVG)
+- ✅ Windows príkaz je funkčný
+
+---
+
+## 📚 DOKUMENTÁCIA:
+
+- `README.md` - Hlavný návod
+- `INSTALL_ICON.md` - Podrobné inštrukcie
+- `QUICK_START.txt` - Rýchly start
+- `ICON_READY.txt` - Status inštalácie
+
+---
+
+## 🎉 UŽÍVAJTE SI!
+
+Teraz môžeš spustiť aplikáciu ľubovoľným spôsobom:
+
+1. **V termináli:** `naklady`
+2. **V menu:** Hľadaj "Sledovanie Nákladov"
+3. **Na Windowse:** Dvaklik na `naklady.cmd`
+
+Hotovo! 🎊
+
+---
+
+**Vytvorené:** 5. november 2025  
+**Verzácia:** 1.0.0  
+**Status:** ✅ **HOTOVO A TESTOVANÉ!**

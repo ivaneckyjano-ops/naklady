@@ -1,0 +1,324 @@
+{% extends "base.html" %}
+
+{% block title %}Domov - Sledovanie Nákladov{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>Správa Výdavkov</h1>
+    <p>Spravuj a sleduj svoje domáce náklady</p>
+</div>
+
+<div class="grid-2">
+    <!-- Ľavá časť - Formulár -->
+    <div class="card">
+        <h2>Pridaj Nový Výdavok</h2>
+        <form id="expenseForm">
+            <div class="form-group">
+                <label for="mainCategory">Hlavná Kategória</label>
+                <select id="mainCategory" name="mainCategory" required>
+                    <option value="">-- Vyber kategóriu --</option>
+                </select>
+            </div>
+
+            <div class="form-group" id="subcategoryGroup" style="display: none;">
+                <label for="subCategory">Podkategória (voliteľne)</label>
+                <select id="subCategory" name="subCategory">
+                    <option value="">-- Bez podkategórie --</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="amount">Suma (€)</label>
+                <input type="number" id="amount" name="amount" step="0.01" min="0" required>
+            </div>
+
+            <div class="form-group">
+                <label for="description">Popis</label>
+                <input type="text" id="description" name="description" placeholder="Napr. Elektrické vedenie">
+            </div>
+
+            <div class="form-group">
+                <label for="date">Dátum</label>
+                <input type="date" id="date" name="date" required>
+            </div>
+
+            <button type="submit" class="btn btn-primary">Pridaj Výdavok</button>
+        </form>
+
+        <!-- Správa kategórií -->
+        <div class="categories-section">
+            <h3>Kategórie a Podkategórie</h3>
+            <div id="categoriesList" class="categories-tree"></div>
+            <button id="addCategoryBtn" class="btn btn-secondary">+ Pridaj Kategóriu</button>
+            <button id="addSubcategoryBtn" class="btn btn-secondary">+ Pridaj Podkategóriu</button>
+        </div>
+    </div>
+
+    <!-- Pravá časť - Zoznam výdavkov -->
+    <div class="card">
+        <h2>Posledné Výdavky</h2>
+        <div class="filter-group">
+            <input type="number" id="filterYear" placeholder="Rok" min="2020" max="2100">
+            <select id="filterMonth">
+                <option value="">-- Všetky mesiace --</option>
+                <option value="1">Január</option>
+                <option value="2">Február</option>
+                <option value="3">Marec</option>
+                <option value="4">Apríl</option>
+                <option value="5">Máj</option>
+                <option value="6">Jún</option>
+                <option value="7">Júl</option>
+                <option value="8">August</option>
+                <option value="9">September</option>
+                <option value="10">Október</option>
+                <option value="11">November</option>
+                <option value="12">December</option>
+            </select>
+            <button id="filterBtn" class="btn btn-secondary">Filtrovať</button>
+        </div>
+        <div id="expensesList" class="expenses-list"></div>
+    </div>
+</div>
+
+<!-- Modal na pridanie kategórie -->
+<div id="categoryModal" class="modal">
+    <div class="modal-content">
+        <span class="close">&times;</span>
+        <h2>Pridaj Novú Kategóriu</h2>
+        <form id="categoryForm">
+            <div class="form-group">
+                <label for="catName">Názov</label>
+                <input type="text" id="catName" name="name" required>
+            </div>
+            <div class="form-group">
+                <label for="catIcon">Ikona (emoji)</label>
+                <input type="text" id="catIcon" name="icon" value="📦" maxlength="2">
+            </div>
+            <div class="form-group">
+                <label for="catDesc">Popis</label>
+                <input type="text" id="catDesc" name="description">
+            </div>
+            <button type="submit" class="btn btn-primary">Vytvor Kategóriu</button>
+        </form>
+    </div>
+</div>
+
+<!-- Modal na pridanie podkategórie -->
+<div id="subcategoryModal" class="modal">
+    <div class="modal-content">
+        <span class="close">&times;</span>
+        <h2>Pridaj Novú Podkategóriu</h2>
+        <form id="subcategoryForm">
+            <div class="form-group">
+                <label for="subcatParent">Hlavná Kategória</label>
+                <select id="subcatParent" name="parent_id" required>
+                    <option value="">-- Vyber kategóriu --</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="subcatName">Názov Podkategórie</label>
+                <input type="text" id="subcatName" name="name" required>
+            </div>
+            <div class="form-group">
+                <label for="subcatIcon">Ikona (emoji)</label>
+                <input type="text" id="subcatIcon" name="icon" value="📦" maxlength="2">
+            </div>
+            <div class="form-group">
+                <label for="subcatDesc">Popis</label>
+                <input type="text" id="subcatDesc" name="description">
+            </div>
+            <button type="submit" class="btn btn-primary">Vytvor Podkategóriu</button>
+        </form>
+    </div>
+</div>
+
+<style>
+.grid-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+    margin-bottom: 2rem;
+}
+
+.filter-group {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+.filter-group input,
+.filter-group select {
+    flex: 1;
+    padding: 0.5rem;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+.categories-section {
+    margin-top: 2rem;
+    padding-top: 2rem;
+    border-top: 1px solid #eee;
+}
+
+.categories-tree {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    margin: 1rem 0;
+}
+
+.category-item {
+    padding: 0.75rem;
+    background: #f8f9fa;
+    border-radius: 4px;
+    border-left: 4px solid #007bff;
+}
+
+.category-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-weight: bold;
+}
+
+.category-name {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.category-actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.btn-small {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.8rem;
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #007bff;
+}
+
+.btn-small:hover {
+    color: #0056b3;
+    text-decoration: underline;
+}
+
+.subcategories-list {
+    margin-top: 0.5rem;
+    padding-left: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.subcategory-item {
+    padding: 0.5rem 0.75rem;
+    background: #e8f4f8;
+    border-radius: 4px;
+    border-left: 3px solid #17a2b8;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.95rem;
+}
+
+.expenses-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    max-height: 600px;
+    overflow-y: auto;
+}
+
+.expense-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem;
+    background: #f9f9f9;
+    border-radius: 4px;
+    border-left: 4px solid #007bff;
+}
+
+.expense-info {
+    flex: 1;
+}
+
+.expense-category {
+    font-weight: bold;
+    margin-bottom: 0.25rem;
+}
+
+.expense-subcategory {
+    font-size: 0.85rem;
+    color: #666;
+    margin-bottom: 0.25rem;
+}
+
+.expense-details {
+    font-size: 0.9rem;
+    color: #666;
+}
+
+.expense-amount {
+    font-size: 1.25rem;
+    font-weight: bold;
+    color: #28a745;
+    margin: 0 1rem;
+}
+
+.expense-actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.btn-small {
+    padding: 0.25rem 0.75rem;
+    font-size: 0.85rem;
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #007bff;
+}
+
+.btn-small:hover {
+    color: #0056b3;
+    text-decoration: underline;
+}
+
+.btn-small {
+    padding: 0.25rem 0.75rem;
+    font-size: 0.85rem;
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #007bff;
+}
+
+.btn-small:hover {
+    color: #0056b3;
+    text-decoration: underline;
+}
+
+.btn-small.delete {
+    color: #dc3545;
+}
+
+.btn-small.delete:hover {
+    color: #c82333;
+}
+
+@media (max-width: 768px) {
+    .grid-2 {
+        grid-template-columns: 1fr;
+    }
+}
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/index.js') }}"></script>
+{% endblock %}

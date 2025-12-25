@@ -1,0 +1,14 @@
+
+✅ FINÁLNA VERIFIKÁCIA - BEZ TERMINÁLU
+=======================================
+
+KONTROLA SÚBOROV:
+
+[✓] naklady-app              - Script bez terminálu
+[✓] naklady.desktop          - Terminal=false
+[✓] naklady-icon.svg         - Ikona
+[✓] install-icon.sh          - Inštalátor
+
+PREVERENIE KONFIGURÁCIE:
+
+Terminal v naklady.desktop:

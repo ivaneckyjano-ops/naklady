@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prehľad Obchodov - Náklady</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 32px;
+            margin-bottom: 10px;
+        }
+        
+        .content {
+            padding: 30px;
+        }
+        
+        .stats-overview {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+        
+        .stat-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+        }
+        
+        .stat-card h3 {
+            font-size: 14px;
+            opacity: 0.9;
+            margin-bottom: 10px;
+        }
+        
+        .stat-card .value {
+            font-size: 28px;
+            font-weight: bold;
+        }
+        
+        .stores-list {
+            display: grid;
+            gap: 15px;
+        }
+        
+        .store-card {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: #f9f9f9;
+        }
+        
+        .store-card:hover {
+            border-color: #667eea;
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.2);
+            background: white;
+            transform: translateY(-2px);
+        }
+        
+        .store-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .store-name {
+            font-size: 22px;
+            font-weight: bold;
+            color: #333;
+        }
+        
+        .store-icon {
+            font-size: 32px;
+        }
+        
+        .store-stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+        }
+        
+        .stat {
+            text-align: center;
+        }
+        
+        .stat-label {
+            font-size: 12px;
+            color: #999;
+            margin-bottom: 5px;
+        }
+        
+        .stat-value {
+            font-size: 18px;
+            font-weight: bold;
+            color: #667eea;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #999;
+            font-size: 18px;
+        }
+        
+        .empty {
+            text-align: center;
+            padding: 40px;
+            color: #999;
+            font-size: 16px;
+        }
+        
+        .nav-links {
+            text-align: center;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+        }
+        
+        .nav-links a {
+            color: #667eea;
+            text-decoration: none;
+            margin: 0 15px;
+            font-weight: 500;
+        }
+        
+        .nav-links a:hover {
+            text-decoration: underline;
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .modal.active {
+            display: flex;
+        }
+        
+        .modal-content {
+            background: white;
+            border-radius: 10px;
+            padding: 30px;
+            max-width: 600px;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 15px;
+        }
+        
+        .modal-header h2 {
+            color: #333;
+        }
+        
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #999;
+        }
+        
+        .expense-item {
+            padding: 12px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .expense-item:last-child {
+            border-bottom: none;
+        }
+        
+        .expense-info {
+            flex: 1;
+        }
+        
+        .expense-description {
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 3px;
+        }
+        
+        .expense-date {
+            font-size: 12px;
+            color: #999;
+        }
+        
+        .expense-amount {
+            font-size: 18px;
+            font-weight: bold;
+            color: #667eea;
+            text-align: right;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🏪 Prehľad Obchodov</h1>
+            <p>Sleduj svoje výdavky podľa obchodov</p>
+        </div>
+        
+        <div class="content">
+            <div class="stats-overview" id="statsOverview">
+                <div class="stat-card">
+                    <h3>Počet obchodov</h3>
+                    <div class="value" id="storeCount">0</div>
+                </div>
+                <div class="stat-card">
+                    <h3>Celkove výdavky</h3>
+                    <div class="value" id="totalAmount">0€</div>
+                </div>
+                <div class="stat-card">
+                    <h3>Počet transakcií</h3>
+                    <div class="value" id="totalTransactions">0</div>
+                </div>
+                <div class="stat-card">
+                    <h3>Priemerný nákup</h3>
+                    <div class="value" id="averageAmount">0€</div>
+                </div>
+            </div>
+            
+            <div id="storesList" class="stores-list">
+                <div class="loading">Načítavam obchody...</div>
+            </div>
+            
+            <div class="nav-links">
+                <a href="/">← Späť na hlavnú stránku</a>
+                <a href="/qr-scanner">Skener →</a>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Modal na zobrazenie detailov obchodu -->
+    <div class="modal" id="storeModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modalStoreName">Obchod</h2>
+                <button class="close-btn" onclick="closeModal()">✕</button>
+            </div>
+            <div id="storeExpenses"></div>
+        </div>
+    </div>
+    
+    <script>
+        // Načítaj obchody
+        async function loadStores() {
+            try {
+                const response = await fetch('/api/stores');
+                const stores = await response.json();
+                
+                if (stores.length === 0) {
+                    document.getElementById('storesList').innerHTML = '<div class="empty">Zatiaľ nie sú žiadne obchody s výdavkami.</div>';
+                    return;
+                }
+                
+                // Vypočítaj štatistiku
+                let totalAmount = 0;
+                let totalTransactions = 0;
+                
+                stores.forEach(store => {
+                    totalAmount += store.total;
+                    totalTransactions += store.count;
+                });
+                
+                // Aktualizuj štatistiku
+                document.getElementById('storeCount').textContent = stores.length;
+                document.getElementById('totalAmount').textContent = totalAmount.toFixed(2) + '€';
+                document.getElementById('totalTransactions').textContent = totalTransactions;
+                document.getElementById('averageAmount').textContent = (totalAmount / totalTransactions).toFixed(2) + '€';
+                
+                // Vykresli obchody
+                const storesList = document.getElementById('storesList');
+                storesList.innerHTML = '';
+                
+                stores.forEach(store => {
+                    const card = document.createElement('div');
+                    card.className = 'store-card';
+                    card.onclick = () => showStoreDetails(store.store);
+                    
+                    card.innerHTML = `
+                        <div class="store-header">
+                            <div class="store-name">🏬 ${store.store}</div>
+                        </div>
+                        <div class="store-stats">
+                            <div class="stat">
+                                <div class="stat-label">Spolu</div>
+                                <div class="stat-value">${store.total.toFixed(2)}€</div>
+                            </div>
+                            <div class="stat">
+                                <div class="stat-label">Počet nákupov</div>
+                                <div class="stat-value">${store.count}</div>
+                            </div>
+                            <div class="stat">
+                                <div class="stat-label">Priemer</div>
+                                <div class="stat-value">${store.average.toFixed(2)}€</div>
+                            </div>
+                        </div>
+                    `;
+                    
+                    storesList.appendChild(card);
+                });
+                
+            } catch (error) {
+                document.getElementById('storesList').innerHTML = '<div class="empty">Chyba pri načítaní obchodov: ' + error.message + '</div>';
+            }
+        }
+        
+        // Zobraz detaily obchodu
+        async function showStoreDetails(storeName) {
+            try {
+                const response = await fetch(`/api/stores/${storeName}/expenses`);
+                const expenses = await response.json();
+                
+                document.getElementById('modalStoreName').textContent = `🏬 ${storeName}`;
+                
+                const expensesHTML = expenses.map(exp => `
+                    <div class="expense-item">
+                        <div class="expense-info">
+                            <div class="expense-description">${exp.description || exp.category}</div>
+                            <div class="expense-date">${new Date(exp.date).toLocaleDateString('sk-SK')}</div>
+                        </div>
+                        <div class="expense-amount">${exp.amount.toFixed(2)}€</div>
+                    </div>
+                `).join('');
+                
+                document.getElementById('storeExpenses').innerHTML = expensesHTML;
+                document.getElementById('storeModal').classList.add('active');
+                
+            } catch (error) {
+                alert('Chyba pri načítaní detailov: ' + error.message);
+            }
+        }
+        
+        function closeModal() {
+            document.getElementById('storeModal').classList.remove('active');
+        }
+        
+        // Zatvri modal kliknutím von
+        document.getElementById('storeModal').addEventListener('click', (e) => {
+            if (e.target.id === 'storeModal') {
+                closeModal();
+            }
+        });
+        
+        // Načítaj obchody pri otvorení stránky
+        loadStores();
+    </script>
+</body>
+</html>
