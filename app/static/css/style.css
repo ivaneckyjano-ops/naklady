@@ -64,6 +64,108 @@ body {
     opacity: 0.9;
 }
 
+.nav-menu .nav-btn {
+    color: white;
+    text-decoration: none;
+    transition: opacity 0.3s, background 0.3s;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    background: rgba(255, 255, 255, 0.12);
+    border: 1px solid rgba(255, 255, 255, 0.35);
+    font: inherit;
+    cursor: pointer;
+}
+
+.nav-menu .nav-btn:hover {
+    background: rgba(255, 255, 255, 0.25);
+    opacity: 0.95;
+}
+
+/* ==================== GIT ZÁLOHA STATUS ==================== */
+
+.git-backup-status {
+    max-width: 1200px;
+    margin: 1rem auto 0;
+    padding: 0 2rem;
+}
+
+.git-backup-status[hidden] {
+    display: none;
+}
+
+.git-backup-status-box {
+    border-radius: 8px;
+    padding: 1rem 1.1rem;
+    border: 1px solid transparent;
+    background: #f8f9fa;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06);
+}
+
+.git-backup-status-success .git-backup-status-box {
+    border-color: #198754;
+    background: #f3fbf6;
+}
+
+.git-backup-status-error .git-backup-status-box {
+    border-color: #dc3545;
+    background: #fff5f5;
+}
+
+.git-backup-status-info .git-backup-status-box {
+    border-color: #0d6efd;
+    background: #f4f8ff;
+}
+
+.git-backup-status-title {
+    font-weight: 700;
+    margin-bottom: 0.35rem;
+}
+
+.git-backup-status-meta {
+    font-size: 0.88rem;
+    color: #495057;
+    margin-bottom: 0.6rem;
+    white-space: pre-wrap;
+    line-height: 1.45;
+}
+
+.git-backup-status-log {
+    margin: 0;
+    padding: 0.8rem;
+    background: rgba(255, 255, 255, 0.78);
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    border-radius: 6px;
+    white-space: pre-wrap;
+    word-break: break-word;
+    font-size: 0.82rem;
+    line-height: 1.45;
+    max-height: 240px;
+    overflow: auto;
+}
+
+.git-backup-status-actions {
+    margin-top: 0.8rem;
+    display: flex;
+    justify-content: flex-end;
+}
+
+.git-backup-copy-btn {
+    padding: 0.45rem 0.8rem;
+    border-radius: 6px;
+    border: 1px solid rgba(13, 110, 253, 0.35);
+    background: #fff;
+    color: #0d6efd;
+    font: inherit;
+    cursor: pointer;
+    transition: background 0.2s, color 0.2s, border-color 0.2s;
+}
+
+.git-backup-copy-btn:hover {
+    background: #0d6efd;
+    color: #fff;
+    border-color: #0d6efd;
+}
+
 /* ==================== KONTAINER ==================== */
 
 .container {

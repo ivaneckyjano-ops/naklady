@@ -12,11 +12,18 @@ document.addEventListener('DOMContentLoaded', function() {
 
 async function loadComparisonYears() {
     try {
-        const expenses = await apiCall('/expenses');
+        const [expenses, incomes] = await Promise.all([
+            apiCall('/expenses'),
+            apiCall('/incomes')
+        ]);
         const years = new Set();
         
         expenses.forEach(exp => {
             const year = new Date(exp.date).getFullYear();
+            years.add(year);
+        });
+        incomes.forEach(inc => {
+            const year = new Date(inc.date).getFullYear();
             years.add(year);
         });
         

@@ -5,7 +5,23 @@ const MONTH_LABELS = [
     'Júl', 'Aug', 'Sep', 'Okt', 'Nov', 'Dec'
 ];
 
+/** Poradie oblastí vo výpise štatistiky; ostatné abecedne za nimi. */
+const AREA_STATS_ORDER = ['Nevyhnutné potreby', 'Chcenia', 'Investície', 'Rezerva', 'Nezaradené'];
+
 let monthlyChart = null;
+
+function sortAreaStatsEntries(entries) {
+    return [...entries].sort((a, b) => {
+        const na = (a[1] && a[1].name) ? a[1].name : String(a[0]);
+        const nb = (b[1] && b[1].name) ? b[1].name : String(b[0]);
+        const ia = AREA_STATS_ORDER.indexOf(na);
+        const ib = AREA_STATS_ORDER.indexOf(nb);
+        const ra = ia === -1 ? AREA_STATS_ORDER.length : ia;
+        const rb = ib === -1 ? AREA_STATS_ORDER.length : ib;
+        if (ra !== rb) return ra - rb;
+        return na.localeCompare(nb, 'sk');
+    });
+}
 
 document.addEventListener('DOMContentLoaded', function() {
     loadYearSelect();
@@ -29,8 +45,12 @@ function addGroupingControl() {
     const opt2 = document.createElement('option');
     opt2.value = 'subcategory';
     opt2.textContent = 'Podľa podkategórií';
+    const opt3 = document.createElement('option');
+    opt3.value = 'area';
+    opt3.textContent = 'Podľa oblastí';
     select.appendChild(opt1);
     select.appendChild(opt2);
+    select.appendChild(opt3);
 
     container.appendChild(label);
     container.appendChild(select);
@@ -42,11 +62,18 @@ function addGroupingControl() {
 
 async function loadYearSelect() {
     try {
-        const expenses = await apiCall('/expenses');
+        const [expenses, incomes] = await Promise.all([
+            apiCall('/expenses'),
+            apiCall('/incomes')
+        ]);
         const years = new Set();
         
         expenses.forEach(exp => {
             const year = new Date(exp.date).getFullYear();
+            years.add(year);
+        });
+        incomes.forEach(inc => {
+            const year = new Date(inc.date).getFullYear();
             years.add(year);
         });
         
@@ -80,10 +107,15 @@ async function loadStatistics() {
         const stats = await apiCall(endpoint);
         
         displaySummaryStats(stats);
+        displayAreaIncomeSummary(groupBy === 'area' ? (stats.by_area || {}) : {}, stats.income_total || 0);
         // choose which set to display based on control
         if (groupBy === 'subcategory') {
             displayCategoryStats(stats.by_subcategory, stats.total);
             displayDetailedStats(stats.by_subcategory);
+        } else if (groupBy === 'area') {
+            const byArea = stats.by_area || {};
+            displayCategoryStats(byArea, stats.income_total || 0, 'area');
+            displayDetailedStats(byArea, 'area');
         } else {
             displayCategoryStats(stats.by_category, stats.total);
             displayDetailedStats(stats.by_category);
@@ -104,6 +136,10 @@ function displaySummaryStats(stats) {
     
     // Celkové výdavky
     document.getElementById('totalExpenses').textContent = formatCurrency(stats.total);
+    const totalIncomeEl = document.getElementById('totalIncome');
+    if (totalIncomeEl) {
+        totalIncomeEl.textContent = formatCurrency(stats.income_total || 0);
+    }
     
     // Počet transakcií
     let count = 0;
@@ -117,16 +153,22 @@ function displaySummaryStats(stats) {
     document.getElementById('monthlyAverage').textContent = formatCurrency(avg);
 }
 
-function displayCategoryStats(categories, overallTotal = 0) {
+function displayCategoryStats(categories, overallTotal = 0, sortMode = null) {
     const container = document.getElementById('categoryStats');
     container.innerHTML = '';
 
-    Object.entries(categories).forEach(([key, data]) => {
+    let entries = Object.entries(categories);
+    if (sortMode === 'area') {
+        entries = sortAreaStatsEntries(entries);
+    }
+
+    entries.forEach(([key, data]) => {
         const displayName = data && data.name ? data.name : key;
         const icon = data && data.icon ? data.icon : '';
         const total = data && data.total ? data.total : 0;
         const count = data && data.count ? data.count : 0;
         const percent = overallTotal ? Math.round((total / overallTotal) * 100) : 0;
+        const incomeTotal = data && data.income_total ? data.income_total : overallTotal;
 
         const item = document.createElement('div');
         item.className = 'category-stat-item';
@@ -134,6 +176,7 @@ function displayCategoryStats(categories, overallTotal = 0) {
             <div class="category-icon">${icon}</div>
             <div class="category-name">${displayName}${count ? ` <span class="cat-count">(${count})</span>` : ''}</div>
             <div class="category-amount">${formatCurrency(total)}</div>
+            ${sortMode === 'area' ? `<div class="cat-count">Príjem: ${formatCurrency(incomeTotal || 0)} · ${percent}% z príjmu</div>` : ''}
             <div class="category-bar"><div class="category-bar-fill" style="width:${percent}%"></div></div>
         `;
         container.appendChild(item);
@@ -194,17 +237,23 @@ function displayMonthlyChart(monthlyData) {
     });
 }
 
-function displayDetailedStats(categories) {
+function displayDetailedStats(categories, sortMode = null) {
     const container = document.getElementById('detailedStats');
     container.innerHTML = '';
 
-    const sorted = Object.entries(categories)
-        .sort((a, b) => (b[1].total || 0) - (a[1].total || 0));
+    let sorted = Object.entries(categories);
+    if (sortMode === 'area') {
+        sorted = sortAreaStatsEntries(sorted);
+    } else {
+        sorted = sorted.sort((a, b) => (b[1].total || 0) - (a[1].total || 0));
+    }
 
     sorted.forEach(([key, data]) => {
         const name = data && data.name ? `${data.icon || ''} ${data.name}` : key;
         const count = data && data.count ? data.count : 0;
         const total = data && data.total ? data.total : 0;
+        const incomeTotal = data && data.income_total ? data.income_total : 0;
+        const percentIncome = incomeTotal ? Math.round((total / incomeTotal) * 100) : 0;
 
         const row = document.createElement('div');
         row.className = 'detailed-stat-row';
@@ -213,10 +262,69 @@ function displayDetailedStats(categories) {
                 <div class="detailed-stat-name">${name}</div>
                 <div class="detailed-stat-count">${count} transakcií</div>
             </div>
-            <div class="detailed-stat-amount">${formatCurrency(total)}</div>
+            <div class="detailed-stat-amount ${total < 0 ? 'is-refund' : ''}">
+                ${formatCurrency(total)}
+                ${sortMode === 'area' ? `<div class="detailed-stat-count">${percentIncome}% z príjmu</div>` : ''}
+            </div>
         `;
         container.appendChild(row);
     });
+}
+
+function displayAreaIncomeSummary(areas, incomeTotal) {
+    const container = document.getElementById('areaIncomeSummary');
+    if (!container) return;
+
+    if (!areas || !Object.keys(areas).length) {
+        container.innerHTML = '<p class="text-muted">Vyber „Podľa oblastí“, aby si videl porovnanie výdavkov s príjmom.</p>';
+        return;
+    }
+
+    const sorted = Object.entries(areas).sort((a, b) => (b[1].total || 0) - (a[1].total || 0));
+    const table = document.createElement('table');
+    table.className = 'area-income-table';
+
+    table.innerHTML = `
+        <thead>
+            <tr>
+                <th>Oblasť</th>
+                <th>Výdavky</th>
+                <th>Príjem</th>
+                <th>% z príjmu</th>
+            </tr>
+        </thead>
+    `;
+
+    const tbody = document.createElement('tbody');
+    sorted.forEach(([key, area]) => {
+        const expense = area.total || 0;
+        const percent = incomeTotal ? Math.round((expense / incomeTotal) * 100) : 0;
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td>${area.icon || ''} ${area.name || key}</td>
+            <td>${formatCurrency(expense)}</td>
+            <td>${formatCurrency(incomeTotal || 0)}</td>
+            <td>${percent}%</td>
+        `;
+        tbody.appendChild(row);
+    });
+    table.appendChild(tbody);
+
+    const tfoot = document.createElement('tfoot');
+    const totalExpenses = sorted.reduce((sum, [, area]) => sum + (area.total || 0), 0);
+    const totalPercent = incomeTotal ? Math.round((totalExpenses / incomeTotal) * 100) : 0;
+    tfoot.innerHTML = `
+        <tr>
+            <td>Spolu</td>
+            <td>${formatCurrency(totalExpenses)}</td>
+            <td>${formatCurrency(incomeTotal || 0)}</td>
+            <td>${totalPercent}%</td>
+        </tr>
+    `;
+    table.appendChild(tfoot);
+
+    container.innerHTML = '';
+    container.appendChild(table);
 }
 
 // ==================== EVENT LISTENERY ====================
@@ -226,6 +334,70 @@ function setupStatisticsEventListeners() {
 }
 
 // ==================== MESAČNÝ PREHĽAD KATEGÓRIÍ ====================
+
+function renderMonthlyAreaTableBody(container, data, areas) {
+    const months = data.months || MONTH_LABELS.map((_, idx) => String(idx + 1).padStart(2, '0'));
+    const monthLabels = months.map(month => MONTH_LABELS[parseInt(month, 10) - 1] || month);
+
+    const sortedAreas = [...areas].sort((a, b) => {
+        const ia = AREA_STATS_ORDER.indexOf(a.name);
+        const ib = AREA_STATS_ORDER.indexOf(b.name);
+        const ra = ia === -1 ? AREA_STATS_ORDER.length : ia;
+        const rb = ib === -1 ? AREA_STATS_ORDER.length : ib;
+        if (ra !== rb) return ra - rb;
+        return (a.name || '').localeCompare(b.name || '', 'sk');
+    });
+
+    const table = document.createElement('table');
+    table.className = 'category-monthly-table';
+
+    const thead = document.createElement('thead');
+    const headRow = document.createElement('tr');
+    let headHtml = '<th>Oblasť</th>';
+    monthLabels.forEach(label => {
+        headHtml += `<th>${label}</th>`;
+    });
+    headHtml += '<th>Spolu</th>';
+    headRow.innerHTML = headHtml;
+    thead.appendChild(headRow);
+    table.appendChild(thead);
+
+    const tbody = document.createElement('tbody');
+    sortedAreas.forEach(area => {
+        const row = document.createElement('tr');
+        let rowHtml = `<td>${area.icon || ''} ${area.name || ''}</td>`;
+        months.forEach(month => {
+            const value = area.monthly ? area.monthly[month] : 0;
+            rowHtml += `<td>${value ? formatCurrency(value) : '—'}</td>`;
+        });
+        rowHtml += `<td>${formatCurrency(area.total || 0)}</td>`;
+        row.innerHTML = rowHtml;
+        tbody.appendChild(row);
+    });
+    table.appendChild(tbody);
+
+    const tfoot = document.createElement('tfoot');
+    const totalRow = document.createElement('tr');
+    let totalHtml = '<td>Spolu</td>';
+    months.forEach(month => {
+        const sumM = sortedAreas.reduce((s, a) => s + ((a.monthly && a.monthly[month]) || 0), 0);
+        totalHtml += `<td>${sumM ? formatCurrency(sumM) : '—'}</td>`;
+    });
+    const overallTotal = sortedAreas.reduce((s, a) => s + (a.total || 0), 0);
+    totalHtml += `<td>${formatCurrency(overallTotal)}</td>`;
+    totalRow.innerHTML = totalHtml;
+    tfoot.appendChild(totalRow);
+    table.appendChild(tfoot);
+
+    container.appendChild(table);
+
+    const note = document.createElement('p');
+    note.className = 'text-muted';
+    note.style.marginTop = '0.5rem';
+    note.style.fontSize = '0.9rem';
+    note.textContent = 'V tomto zobrazení riadok Spolu zodpovedá súčtu všetkých výdavkov v danom mesiaci (vrátane položiek zaradených do „Bločky bez kategorie“).';
+    container.appendChild(note);
+}
 
 async function loadMonthlyCategoryStats(groupBy = 'category') {
     const container = document.getElementById('categoryMonthlyContainer');
@@ -248,7 +420,22 @@ function renderMonthlyCategoryTable(data, groupBy = 'category') {
 
     container.innerHTML = '';
 
-    if (!data || !Array.isArray(data.categories) || data.categories.length === 0) {
+    if (!data) {
+        container.innerHTML = '<p class="text-muted">Pre zvolené obdobie nie sú dostupné žiadne dáta.</p>';
+        return;
+    }
+
+    if (groupBy === 'area') {
+        const areas = data.areas || [];
+        if (areas.length === 0) {
+            container.innerHTML = '<p class="text-muted">Pre zvolené obdobie nie sú dostupné žiadne dáta.</p>';
+            return;
+        }
+        renderMonthlyAreaTableBody(container, data, areas);
+        return;
+    }
+
+    if (!Array.isArray(data.categories) || data.categories.length === 0) {
         container.innerHTML = '<p class="text-muted">Pre zvolené obdobie nie sú dostupné žiadne dáta.</p>';
         return;
     }

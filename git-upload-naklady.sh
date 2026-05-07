@@ -2,21 +2,21 @@
 set -euo pipefail
 
 # Simple script to commit local changes and push current HEAD to
-# branch 'naklady' of GitHub repo 'ivanecky/jano/HP'.
+# branch 'main' of GitHub repo 'ivaneckyjano-ops/naklady'.
 # Modeled after common git-upload patterns.
 
 # Usage:
 #   ./git-upload-naklady.sh "Commit message"
 # Environment overrides:
 #   GIT_REMOTE_URL - if set, script pushes to this URL instead of default
-#   GIT_BRANCH - target branch (default: naklady)
+#   GIT_BRANCH - target branch (default: main)
 
-: ${GIT_REMOTE_URL:="git@github.com:ivaneckyjano-ops/HP.git"}
-: ${GIT_BRANCH:="naklady"}
+: ${GIT_REMOTE_URL:="git@github.com:ivaneckyjano-ops/naklady.git"}
+: ${GIT_BRANCH:="main"}
 
 # Parse options: --preview and --path (or use env var TARGET_PATH)
 PREVIEW=false
-TARGET_PATH=""
+FLAG_PATH=""
 
 # Consume leading flags: --preview and --path
 while [ $# -gt 0 ]; do
@@ -30,11 +30,11 @@ while [ $# -gt 0 ]; do
         echo "Error: --path requires an argument" >&2
         exit 1
       fi
-      TARGET_PATH="$2"
+      FLAG_PATH="$2"
       shift 2
       ;;
     --path=*)
-      TARGET_PATH="${1#--path=}"
+      FLAG_PATH="${1#--path=}"
       shift
       ;;
     --help)
@@ -67,13 +67,19 @@ else
 fi
 
 # Target path precedence: explicit TARGET_PATH env var > --path flag > script relative path
-TARGET_PATH="${TARGET_PATH:-${TARGET_PATH:-${TARGET_PATH:-}}}"
-TARGET_PATH="${TARGET_PATH:-${TARGET_PATH:-}}"
-TARGET_PATH="${TARGET_PATH:-$REL_PATH}"
+TARGET_PATH="${TARGET_PATH:-}"
+if [ -n "$TARGET_PATH" ]; then
+  :
+elif [ -n "$FLAG_PATH" ]; then
+  TARGET_PATH="$FLAG_PATH"
+else
+  TARGET_PATH="$REL_PATH"
+fi
+
 TARGET_PATH="${TARGET_PATH%.}"  # trim trailing dot if any
 
 # Ensure TARGET_PATH is relative to repo root
-if [ "$TARGET_PATH" = '.' ]; then
+if [ -z "$TARGET_PATH" ] || [ "$TARGET_PATH" = '.' ]; then
   TARGET_PATH='.'
 fi
 

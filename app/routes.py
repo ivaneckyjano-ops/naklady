@@ -3,14 +3,39 @@
 Trasy aplikácie (routes)
 """
 from flask import Blueprint, render_template, request, jsonify
+import subprocess
 from app import db
-from app.models import Category, Expense
+from app.models import Category, Expense, Income
+from app.category_areas import effective_area_label, area_icon_for_label
 from datetime import datetime, timedelta
 from sqlalchemy import func, extract
 import json
+import os
 
 main_bp = Blueprint('main', __name__)
 api_bp = Blueprint('api', __name__)
+
+# Helper: trigger background backup (non-blocking)
+def trigger_backup():
+    """Spustí backup skript na pozadí bez blokovania hlavného vlákna."""
+    try:
+        subprocess.Popen(['/home/narbon/Aplikácie/expense-tracker/backup_db.sh'],
+                         stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    except Exception:
+        # nechceme hádzať chybu používateľovi pri zápise
+        pass
+
+
+def _repo_root():
+    return os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+
+
+def _git_backup_request_allowed():
+    """Git push len z lokálneho prehliadača (nie z LAN/internetu)."""
+    addr = (request.environ.get('REMOTE_ADDR') or request.remote_addr or '').strip()
+    if addr in ('127.0.0.1', '::1', '::ffff:127.0.0.1'):
+        return True
+    return addr.startswith('127.')
 
 # ==================== FRONTEND ROUTES ====================
 
@@ -80,11 +105,15 @@ def create_category():
         if parent.parent_id is not None:
             return jsonify({'error': 'Nie je možné vytvoriť podkategóriu podkategórie'}), 400
     
+    area_raw = data.get('area')
+    area_val = (area_raw.strip() if isinstance(area_raw, str) and area_raw.strip() else None)
+
     category = Category(
         name=data['name'],
         icon=data.get('icon', '📦'),
         description=data.get('description', ''),
-        parent_id=parent_id
+        parent_id=parent_id,
+        area=area_val
     )
     db.session.add(category)
     db.session.commit()
@@ -103,6 +132,14 @@ def update_category(id):
         category.icon = data['icon']
     if 'description' in data:
         category.description = data['description']
+    if 'area' in data:
+        ar = data['area']
+        if ar is None:
+            category.area = None
+        elif isinstance(ar, str):
+            category.area = ar.strip() or None
+        else:
+            category.area = None
     
     db.session.commit()
     return jsonify(category.to_dict())
@@ -157,15 +194,25 @@ def create_expense():
     else:
         expense_date = datetime.utcnow().date()
     
+    try:
+        amount_val = float(str(data['amount']).replace(',', '.'))
+    except (ValueError, TypeError):
+        return jsonify({'error': 'Neplatná suma'}), 400
+
     expense = Expense(
         category_id=data['category_id'],
-        amount=float(data['amount']),
+        amount=amount_val,
         description=data.get('description', ''),
         store=data.get('store', ''),  # Obchod z QR kódu alebo formulára
         date=expense_date
     )
     db.session.add(expense)
     db.session.commit()
+    # spusti zálohovanie (asynchrónne)
+    try:
+        trigger_backup()
+    except Exception:
+        pass
     
     return jsonify(expense.to_dict()), 201
 
@@ -182,7 +229,10 @@ def update_expense(id):
         expense.category_id = data['category_id']
     
     if 'amount' in data:
-        expense.amount = float(data['amount'])
+        try:
+            expense.amount = float(str(data['amount']).replace(',', '.'))
+        except (ValueError, TypeError):
+            return jsonify({'error': 'Neplatná suma'}), 400
     
     if 'description' in data:
         expense.description = data['description']
@@ -194,6 +244,10 @@ def update_expense(id):
         expense.date = datetime.fromisoformat(data['date']).date()
     
     db.session.commit()
+    try:
+        trigger_backup()
+    except Exception:
+        pass
     return jsonify(expense.to_dict())
 
 @api_bp.route('/expenses/<int:id>', methods=['DELETE'])
@@ -202,7 +256,111 @@ def delete_expense(id):
     expense = Expense.query.get_or_404(id)
     db.session.delete(expense)
     db.session.commit()
+    try:
+        trigger_backup()
+    except Exception:
+        pass
     return '', 204
+
+@api_bp.route('/incomes', methods=['GET'])
+def get_incomes():
+    """Získaj príjmy s filtrovacou možnosťou"""
+    year = request.args.get('year', type=int)
+    month = request.args.get('month', type=int)
+
+    query = Income.query
+    if year:
+        query = query.filter(extract('year', Income.date) == year)
+    if month:
+        query = query.filter(extract('month', Income.date) == month)
+
+    incomes = query.order_by(Income.date.desc()).all()
+    return jsonify([inc.to_dict() for inc in incomes])
+
+@api_bp.route('/incomes', methods=['POST'])
+def create_income():
+    """Vytvor nový príjem"""
+    data = request.get_json()
+
+    if not data or not data.get('amount'):
+        return jsonify({'error': 'Chýbajúce povinné polia'}), 400
+
+    income_date = data.get('date')
+    if income_date:
+        income_date = datetime.fromisoformat(income_date).date()
+    else:
+        income_date = datetime.utcnow().date()
+
+    try:
+        amount_val = float(str(data['amount']).replace(',', '.'))
+    except (ValueError, TypeError):
+        return jsonify({'error': 'Neplatná suma'}), 400
+
+    income = Income(
+        amount=amount_val,
+        description=data.get('description', ''),
+        source=data.get('source', ''),
+        date=income_date
+    )
+    db.session.add(income)
+    db.session.commit()
+    return jsonify(income.to_dict()), 201
+
+@api_bp.route('/incomes/<int:id>', methods=['DELETE'])
+def delete_income(id):
+    """Vymaž príjem"""
+    income = Income.query.get_or_404(id)
+    db.session.delete(income)
+    db.session.commit()
+    return '', 204
+
+
+@api_bp.route('/git-backup', methods=['POST'])
+def git_backup_to_github():
+    """
+    Spustí git-upload-naklady.sh (commit + push na git@github.com:ivaneckyjano-ops/naklady.git, vetva main).
+    Len z localhostu — aplikácia je určená na lokálne spustenie.
+    """
+    if not _git_backup_request_allowed():
+        return jsonify({'ok': False, 'error': 'Git záloha je dostupná len z tohto počítača (localhost).'}), 403
+
+    payload = request.get_json(silent=True) or {}
+    commit_msg = (payload.get('message') or '').strip()
+
+    script = os.path.join(_repo_root(), 'git-upload-naklady.sh')
+    if not os.path.isfile(script):
+        return jsonify({'ok': False, 'error': 'Chýba súbor git-upload-naklady.sh v koreni projektu.'}), 200
+
+    cmd = ['bash', script]
+    if commit_msg:
+        cmd.append(commit_msg)
+
+    try:
+        proc = subprocess.run(
+            cmd,
+            cwd=_repo_root(),
+            capture_output=True,
+            text=True,
+            timeout=120,
+        )
+    except subprocess.TimeoutExpired:
+        return jsonify({'ok': False, 'error': 'Časový limit 120 s — skús znova alebo spusti skript v termináli.'}), 200
+    except OSError as e:
+        return jsonify({'ok': False, 'error': str(e)}), 200
+
+    out = (proc.stdout or '').strip()
+    err = (proc.stderr or '').strip()
+    tail_out = out.split('\n')[-1] if out else ''
+    tail_err = err.split('\n')[-1] if err else ''
+    summary = tail_err or tail_out or ('V poriadku' if proc.returncode == 0 else f'Git skončil s kódom {proc.returncode}')
+
+    return jsonify({
+        'ok': proc.returncode == 0,
+        'returncode': proc.returncode,
+        'summary': summary,
+        'stdout': out[-8000:] if out else '',
+        'stderr': err[-4000:] if err else '',
+    }), 200
 
 # ----- ŠTATISTIKA -----
 
@@ -221,6 +379,12 @@ def get_summary_stats():
         query = query.filter(extract('month', Expense.date) == month)
     
     total = db.session.query(func.sum(Expense.amount)).filter(Expense.query.filter(query.statement).whereclause).scalar() or 0
+    income_query = Income.query
+    if year:
+        income_query = income_query.filter(extract('year', Income.date) == year)
+    if month:
+        income_query = income_query.filter(extract('month', Income.date) == month)
+    income_total = income_query.with_entities(func.sum(Income.amount)).scalar() or 0
     
     expenses = query.all()
     
@@ -247,9 +411,11 @@ def get_summary_stats():
     
     return jsonify({
         'total': total,
+        'income_total': income_total,
         'by_category': by_category,
         'by_month': by_month,
-        'expense_count': len(expenses)
+        'expense_count': len(expenses),
+        'income_count': income_query.count()
     })
 
 @api_bp.route('/stats/yearly', methods=['GET'])
@@ -257,7 +423,7 @@ def get_yearly_stats():
     """Získaj ročné štatistiky"""
     year = request.args.get('year', type=int, default=datetime.utcnow().year)
     
-    # Mesačné súčty
+    # Mesačné súčty výdavkov
     monthly_totals = {}
     for month in range(1, 13):
         total = db.session.query(func.sum(Expense.amount)).filter(
@@ -265,6 +431,15 @@ def get_yearly_stats():
             extract('month', Expense.date) == month
         ).scalar() or 0
         monthly_totals[f'{month:02d}'] = total
+
+    # Mesačné súčty príjmov
+    income_monthly_totals = {}
+    for month in range(1, 13):
+        total = db.session.query(func.sum(Income.amount)).filter(
+            extract('year', Income.date) == year,
+            extract('month', Income.date) == month
+        ).scalar() or 0
+        income_monthly_totals[f'{month:02d}'] = total
     
     # Kategórie (vrátane podkategórií) v danom roku - vrátime aj parent_id pre každú kategóriu
     expenses = Expense.query.filter(extract('year', Expense.date) == year).all()
@@ -298,11 +473,35 @@ def get_yearly_stats():
             }
         by_category_top[parent_key]['total'] += sub['total']
 
+    by_area = {}
+    for exp in expenses:
+        label = effective_area_label(exp.category)
+        if label not in by_area:
+            by_area[label] = {
+                'name': label,
+                'icon': area_icon_for_label(label),
+                'total': 0,
+                'count': 0,
+                'income_total': 0
+            }
+        by_area[label]['total'] += exp.amount
+        by_area[label]['count'] += 1
+
+    income_total = db.session.query(func.sum(Income.amount)).filter(
+        extract('year', Income.date) == year
+    ).scalar() or 0
+
+    for area in by_area.values():
+        area['income_total'] = income_total
+
     return jsonify({
         'year': year,
         'monthly_totals': monthly_totals,
+        'income_monthly_totals': income_monthly_totals,
+        'income_total': income_total,
         'by_category': by_category_top,      # top-level categories
         'by_subcategory': by_subcategory,    # individual categories including parent_id
+        'by_area': by_area,
         'total': sum(monthly_totals.values())
     })
 
@@ -374,10 +573,29 @@ def get_monthly_category_stats():
                 categories[parent_id]['monthly'][m] += val
                 categories[parent_id]['total'] += val
 
+    areas_map = {}
+    year_expenses = Expense.query.filter(extract('year', Expense.date) == year).all()
+    for exp in year_expenses:
+        label = effective_area_label(exp.category)
+        if label not in areas_map:
+            areas_map[label] = {
+                'name': label,
+                'icon': area_icon_for_label(label),
+                'monthly': {m: 0 for m in months},
+                'total': 0
+            }
+        mk = f'{exp.date.month:02d}'
+        amt = float(exp.amount or 0)
+        areas_map[label]['monthly'][mk] += amt
+        areas_map[label]['total'] += amt
+
+    areas_list = sorted(areas_map.values(), key=lambda x: -x['total'])
+
     return jsonify({
         'year': year,
         'months': months,
         'categories': list(categories.values()),
+        'areas': areas_list,
         'monthly_totals': monthly_totals
     })
 

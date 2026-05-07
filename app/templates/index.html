@@ -29,7 +29,7 @@
 
             <div class="form-group">
                 <label for="amount">Suma (€)</label>
-                <input type="number" id="amount" name="amount" step="0.01" min="0" required>
+                <input type="number" id="amount" name="amount" step="0.01" required>
             </div>
 
             <div class="form-group">
@@ -48,35 +48,89 @@
         <!-- Správa kategórií -->
         <div class="categories-section">
             <h3>Kategórie a Podkategórie</h3>
+            <p class="categories-area-hint">
+                Pri každej kategórii uvidíš tlačidlo <strong>Oblasť</strong> a štítok oblasti (pre štatistiky).
+                Kategórie s podkategóriami sú zbalené a rozbalíš ich kliknutím na šípku.
+                Ak ich nevidíš, skús <kbd>Ctrl</kbd>+<kbd>F5</kbd> alebo vyčistiť cache pre túto stránku.
+            </p>
             <div id="categoriesList" class="categories-tree"></div>
             <button id="addCategoryBtn" class="btn btn-secondary">+ Pridaj Kategóriu</button>
             <button id="addSubcategoryBtn" class="btn btn-secondary">+ Pridaj Podkategóriu</button>
         </div>
     </div>
 
-    <!-- Pravá časť - Zoznam výdavkov -->
+    <!-- Pravá časť - Zoznam výdavkov a príjmov -->
     <div class="card">
-        <h2>Posledné Výdavky</h2>
-        <div class="filter-group">
-            <input type="number" id="filterYear" placeholder="Rok" min="2020" max="2100">
-            <select id="filterMonth">
-                <option value="">-- Všetky mesiace --</option>
-                <option value="1">Január</option>
-                <option value="2">Február</option>
-                <option value="3">Marec</option>
-                <option value="4">Apríl</option>
-                <option value="5">Máj</option>
-                <option value="6">Jún</option>
-                <option value="7">Júl</option>
-                <option value="8">August</option>
-                <option value="9">September</option>
-                <option value="10">Október</option>
-                <option value="11">November</option>
-                <option value="12">December</option>
-            </select>
-            <button id="filterBtn" class="btn btn-secondary">Filtrovať</button>
+        <details class="fold-section fold-expenses">
+            <summary class="fold-summary">
+                <span class="fold-summary-main">
+                    <span class="fold-chevron" aria-hidden="true"></span>
+                    <span class="fold-summary-title">Posledné výdavky</span>
+                </span>
+                <span class="fold-summary-meta">kliknutím zbalíš alebo rozbalíš</span>
+            </summary>
+            <div class="fold-body">
+                <div class="filter-group">
+                    <input type="number" id="filterYear" placeholder="Rok" min="2020" max="2100">
+                    <select id="filterMonth">
+                        <option value="">-- Všetky mesiace --</option>
+                        <option value="1">Január</option>
+                        <option value="2">Február</option>
+                        <option value="3">Marec</option>
+                        <option value="4">Apríl</option>
+                        <option value="5">Máj</option>
+                        <option value="6">Jún</option>
+                        <option value="7">Júl</option>
+                        <option value="8">August</option>
+                        <option value="9">September</option>
+                        <option value="10">Október</option>
+                        <option value="11">November</option>
+                        <option value="12">December</option>
+                    </select>
+                    <button id="filterBtn" class="btn btn-secondary">Filtrovať</button>
+                </div>
+                <p class="filter-applies-hint">Rok a mesiac sa používajú aj pre zoznam príjmov v druhom bloku.</p>
+                <div id="expensesList" class="expenses-list"></div>
+            </div>
+        </details>
+
+        <div class="income-section">
+            <details class="fold-section fold-incomes">
+                <summary class="fold-summary">
+                    <span class="fold-summary-main">
+                        <span class="fold-chevron" aria-hidden="true"></span>
+                        <span class="fold-summary-title">Zapísané príjmy</span>
+                    </span>
+                    <span class="fold-summary-meta">kliknutím zbalíš alebo rozbalíš</span>
+                </summary>
+                <div class="fold-body fold-body--incomes">
+                    <p class="income-hint">Tu vidíš uložené záznamy (podľa filtra v bloku vyššie). Po pridaní sa zoznam hneď obnoví.</p>
+                    <div id="incomesList" class="incomes-list"></div>
+                </div>
+            </details>
+
+            <h3 class="income-form-title">Pridať príjem</h3>
+            <p class="income-hint income-hint-secondary">Príjmy sa používajú v štatistike pri porovnaní oblastí s príjmom.</p>
+            <form id="incomeForm" class="income-form">
+                <div class="form-group">
+                    <label for="incomeAmount">Suma (€)</label>
+                    <input type="number" id="incomeAmount" name="amount" step="0.01" required>
+                </div>
+                <div class="form-group">
+                    <label for="incomeSource">Zdroj</label>
+                    <input type="text" id="incomeSource" name="source" placeholder="Napr. Mzda">
+                </div>
+                <div class="form-group">
+                    <label for="incomeDesc">Popis</label>
+                    <input type="text" id="incomeDesc" name="description" placeholder="Napr. Výplata za marec">
+                </div>
+                <div class="form-group">
+                    <label for="incomeDate">Dátum</label>
+                    <input type="date" id="incomeDate" name="date" required>
+                </div>
+                <button type="submit" class="btn btn-primary">Pridaj Príjem</button>
+            </form>
         </div>
-        <div id="expensesList" class="expenses-list"></div>
     </div>
 </div>
 
@@ -93,6 +147,15 @@
             <div class="form-group">
                 <label for="catIcon">Ikona (emoji)</label>
                 <input type="text" id="catIcon" name="icon" value="📦" maxlength="2">
+            </div>
+            <div class="form-group">
+                <label for="catArea">Oblasť (štatistiky)</label>
+                <select id="catArea" name="area"></select>
+                <small style="color:#666;display:block;margin-top:0.35rem;">Zoskupuje kategórie na stránke Štatistika (podľa oblastí).</small>
+            </div>
+            <div class="form-group" id="catAreaCustomWrap" style="display: none;">
+                <label for="catAreaCustom">Vlastná oblasť</label>
+                <input type="text" id="catAreaCustom" maxlength="80" placeholder="Napr. Darčeky">
             </div>
             <div class="form-group">
                 <label for="catDesc">Popis</label>
@@ -124,11 +187,39 @@
                 <input type="text" id="subcatIcon" name="icon" value="📦" maxlength="2">
             </div>
             <div class="form-group">
+                <label for="subcatArea">Oblasť (štatistiky)</label>
+                <select id="subcatArea" name="area"></select>
+                <small style="color:#666;display:block;margin-top:0.35rem;">Ak nevyberieš, použije sa oblasť hlavnej kategórie.</small>
+            </div>
+            <div class="form-group" id="subcatAreaCustomWrap" style="display: none;">
+                <label for="subcatAreaCustom">Vlastná oblasť</label>
+                <input type="text" id="subcatAreaCustom" maxlength="80">
+            </div>
+            <div class="form-group">
                 <label for="subcatDesc">Popis</label>
                 <input type="text" id="subcatDesc" name="description">
             </div>
             <button type="submit" class="btn btn-primary">Vytvor Podkategóriu</button>
         </form>
+    </div>
+</div>
+
+<!-- Modal: zmena oblasti existujúcej kategórie -->
+<div id="areaEditModal" class="modal">
+    <div class="modal-content">
+        <span class="close">&times;</span>
+        <h2>Oblasť kategórie</h2>
+        <p id="areaEditCatTitle" style="margin-bottom:1rem;color:#444;"></p>
+        <input type="hidden" id="areaEditCatId">
+        <div class="form-group">
+            <label for="areaEditSelect">Oblasť</label>
+            <select id="areaEditSelect"></select>
+        </div>
+        <div class="form-group" id="areaEditCustomWrap" style="display: none;">
+            <label for="areaEditCustom">Vlastná oblasť</label>
+            <input type="text" id="areaEditCustom" maxlength="80">
+        </div>
+        <button type="button" id="areaEditSaveBtn" class="btn btn-primary">Uložiť</button>
     </div>
 </div>
 
@@ -154,10 +245,210 @@
     border-radius: 4px;
 }
 
+/* Rozbalovacie bloky: výdavky / príjmy */
+.fold-section {
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    background: #fff;
+    overflow: hidden;
+}
+
+.fold-section.fold-expenses {
+    margin-bottom: 1rem;
+}
+
+.fold-summary {
+    list-style: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+    padding: 0.85rem 1rem;
+    background: linear-gradient(180deg, #f8f9fa 0%, #eef1f4 100%);
+    font-weight: 600;
+    color: #333;
+    user-select: none;
+}
+
+.fold-summary::-webkit-details-marker {
+    display: none;
+}
+
+.fold-summary-main {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    min-width: 0;
+}
+
+.fold-chevron {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.35rem;
+    height: 1.35rem;
+    border-radius: 4px;
+    background: #e9ecef;
+    font-size: 0.55rem;
+    line-height: 1;
+    color: #495057;
+    transition: transform 0.2s ease;
+}
+
+.fold-chevron::before {
+    content: '▶';
+}
+
+details[open] > .fold-summary .fold-chevron {
+    transform: rotate(90deg);
+}
+
+.fold-summary-title {
+    font-size: 1.05rem;
+}
+
+.fold-summary-meta {
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: #6c757d;
+}
+
+.fold-body {
+    padding: 1rem 1rem 1.1rem;
+    border-top: 1px solid #e9ecef;
+}
+
+.fold-body--incomes .income-hint {
+    margin-top: 0;
+}
+
 .categories-section {
     margin-top: 2rem;
     padding-top: 2rem;
     border-top: 1px solid #eee;
+}
+
+.categories-area-hint {
+    font-size: 0.88rem;
+    color: #495057;
+    background: #e7f1ff;
+    border-left: 4px solid #0d6efd;
+    padding: 0.65rem 0.85rem;
+    border-radius: 4px;
+    margin: 0 0 0.75rem 0;
+    line-height: 1.45;
+}
+
+.categories-area-hint kbd {
+    font-size: 0.8rem;
+    padding: 0.1rem 0.35rem;
+    border-radius: 3px;
+    border: 1px solid #ccc;
+    background: #fff;
+}
+
+.income-section {
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid #eee;
+}
+
+.fold-section.fold-incomes {
+    margin-bottom: 1rem;
+}
+
+.income-hint {
+    font-size: 0.88rem;
+    color: #495057;
+    margin: 0 0 1rem 0;
+}
+
+.income-hint-secondary {
+    margin-top: -0.5rem;
+}
+
+.filter-applies-hint {
+    font-size: 0.82rem;
+    color: #6c757d;
+    margin: -0.35rem 0 0.75rem 0;
+    line-height: 1.35;
+}
+
+.income-form-title {
+    margin-top: 0.5rem;
+    margin-bottom: 0.25rem;
+    font-size: 1.15rem;
+    color: #333;
+}
+
+.incomes-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    max-height: 280px;
+    overflow-y: auto;
+    margin-bottom: 0.25rem;
+}
+
+.incomes-empty {
+    text-align: center;
+    color: #868e96;
+    padding: 1rem 0.5rem;
+    font-size: 0.9rem;
+    line-height: 1.4;
+}
+
+.income-item {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 0.75rem;
+    padding: 0.65rem 0.85rem;
+    background: #f4fff6;
+    border-radius: 6px;
+    border-left: 4px solid #28a745;
+}
+
+.income-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.income-source-line {
+    font-weight: 600;
+    color: #155724;
+    margin-bottom: 0.2rem;
+}
+
+.income-meta {
+    font-size: 0.88rem;
+    color: #555;
+    line-height: 1.35;
+}
+
+.income-amount {
+    font-weight: 700;
+    color: #198754;
+    white-space: nowrap;
+}
+
+.income-actions {
+    display: flex;
+    align-items: center;
+    flex-shrink: 0;
+}
+
+.income-form {
+    display: grid;
+    gap: 1rem;
+}
+
+.income-form .form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
 }
 
 .categories-tree {
@@ -190,6 +481,29 @@
 .category-actions {
     display: flex;
     gap: 0.5rem;
+}
+
+.category-area-badge {
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: #495057;
+    background: #e9ecef;
+    padding: 0.15rem 0.45rem;
+    border-radius: 999px;
+    margin-left: 0.35rem;
+    white-space: nowrap;
+}
+
+.category-area-badge.sub {
+    font-size: 0.68rem;
+}
+
+.btn-small.btn-muted {
+    color: #6c757d;
+}
+
+.btn-small.btn-muted:hover {
+    color: #495057;
 }
 
 .btn-small {
@@ -225,22 +539,30 @@
     font-size: 0.95rem;
 }
 
+.category-toggle-btn {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    color: #007bff;
+    font-size: 0.95rem;
+    padding: 0;
+    margin-right: 0.35rem;
+}
+
+.category-toggle-btn:hover {
+    color: #0056b3;
+}
+
+.subcategories-list.is-hidden {
+    display: none;
+}
+
 .expenses-list {
     display: flex;
     flex-direction: column;
     gap: 0.5rem;
     max-height: 600px;
     overflow-y: auto;
-}
-
-.expense-item {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 1rem;
-    background: #f9f9f9;
-    border-radius: 4px;
-    border-left: 4px solid #007bff;
 }
 
 .expense-info {
@@ -261,13 +583,6 @@
 .expense-details {
     font-size: 0.9rem;
     color: #666;
-}
-
-.expense-amount {
-    font-size: 1.25rem;
-    font-weight: bold;
-    color: #28a745;
-    margin: 0 1rem;
 }
 
 .expense-actions {
@@ -320,5 +635,5 @@
 {% endblock %}
 
 {% block extra_js %}
-<script src="{{ url_for('static', filename='js/index.js') }}"></script>
+<script src="{{ url_for('static', filename='js/index.js') }}?v={{ asset_ver }}"></script>
 {% endblock %}

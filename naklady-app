@@ -1,5 +1,6 @@
 #!/bin/bash
-cd /home/narbon/Aplikácie/expense-tracker
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+cd "$SCRIPT_DIR"
 pkill -f "python.*run.py" 2>/dev/null || true
 sleep 1
 nohup ./venv/bin/python run.py > /tmp/naklady.log 2>&1 &

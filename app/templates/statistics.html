@@ -15,6 +15,11 @@
     </select>
 </div>
 
+<p class="text-muted" style="font-size: 0.92rem; margin-bottom: 1.25rem;">
+    <strong>Oblasti</strong> (Nevyhnutné potreby, Chcenia, Investície, Rezerva…) priraď kategóriám na stránke <a href="/">Domov</a>
+    (pri vytvárení kategórie alebo tlačidlom „Oblasť“). Tu ich potom vyber v rozbaľovači <strong>„Zobraziť:“</strong> vedľa roku — voľba <strong>„Podľa oblastí“</strong>.
+</p>
+
 <div class="grid-2">
     <!-- Zhrnutie -->
     <div class="card">
@@ -23,6 +28,10 @@
             <div class="stat-item">
                 <span class="stat-label">Celkové výdavky:</span>
                 <span class="stat-value" id="totalExpenses">€0.00</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-label">Celkové príjmy:</span>
+                <span class="stat-value" id="totalIncome">€0.00</span>
             </div>
             <div class="stat-item">
                 <span class="stat-label">Počet transakcií:</span>
@@ -35,9 +44,9 @@
         </div>
     </div>
 
-    <!-- Výdavky podľa kategórií -->
+    <!-- Výdavky podľa kategórií alebo oblastí -->
     <div class="card">
-        <h2>Výdavky podľa Kategórií</h2>
+        <h2>Výdavky podľa zoskupenia</h2>
         <div id="categoryStats" class="category-stats"></div>
     </div>
 </div>
@@ -48,14 +57,21 @@
 </div>
 
 <div class="card">
-    <h2>Mesačný rozpad podľa kategórií</h2>
+    <h2>Uhrnutie podľa oblastí</h2>
+    <div id="areaIncomeSummary" class="area-income-summary">
+        <p class="text-muted">Vyber „Podľa oblastí“ v prepínači zobrazenia.</p>
+    </div>
+</div>
+
+<div class="card">
+    <h2>Mesačný rozpad</h2>
     <div id="categoryMonthlyContainer" class="category-monthly-table-wrapper">
         <p class="text-muted">Načítavam dáta...</p>
     </div>
 </div>
 
 <div class="card">
-    <h2>Podrobný Prehľad Kategórií</h2>
+    <h2>Podrobný prehľad</h2>
     <div id="detailedStats" class="detailed-stats"></div>
 </div>
 
@@ -99,6 +115,38 @@
     font-size: 1.8rem;
     font-weight: bold;
     color: #007bff;
+}
+
+.area-income-summary {
+    overflow-x: auto;
+}
+
+.area-income-table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 600px;
+}
+
+.area-income-table th,
+.area-income-table td {
+    border: 1px solid #e0e0e0;
+    padding: 0.75rem;
+    text-align: right;
+    font-size: 0.95rem;
+}
+
+.area-income-table th:first-child,
+.area-income-table td:first-child {
+    text-align: left;
+}
+
+.area-income-table thead {
+    background: #f5f7fb;
+}
+
+.area-income-table tfoot td {
+    font-weight: bold;
+    background: #f0f4ff;
 }
 
 .category-stats {
@@ -199,7 +247,6 @@
 .detailed-stat-amount {
     font-size: 1.2rem;
     font-weight: bold;
-    color: #28a745;
 }
 
 .category-monthly-table-wrapper {
@@ -293,5 +340,5 @@
 
 {% block extra_js %}
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script src="{{ url_for('static', filename='js/statistics.js') }}"></script>
+<script src="{{ url_for('static', filename='js/statistics.js') }}?v={{ asset_ver }}"></script>
 {% endblock %}

@@ -1,10 +1,12 @@
 <!DOCTYPE html>
 <html lang="sk">
+{# Zmeň po úpravách CSS/JS, aby sa v prehliadači obišla stará cache. #}
+{% set asset_ver = '20260203k' %}
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Sledovanie Nákladov{% endblock %}</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}?v={{ asset_ver }}">
     {% block extra_css %}{% endblock %}
 </head>
 <body>
@@ -15,9 +17,16 @@
                 <li><a href="/" class="nav-link">Domov</a></li>
                 <li><a href="/statistics" class="nav-link">Štatistika</a></li>
                 <li><a href="/comparison" class="nav-link">Porovnanie</a></li>
+                <li>
+                    <button type="button" class="nav-link nav-btn" id="gitHubBackupBtn"
+                        title="Commit a push do repozitára ivaneckyjano-ops/naklady (vetva main)">Záloha na GitHub</button>
+                </li>
+                <li><a href="https://github.com/ivaneckyjano-ops/naklady" class="nav-link" target="_blank" rel="noopener noreferrer">Repozitár</a></li>
             </ul>
         </div>
     </nav>
+
+    <div id="gitHubBackupStatus" class="git-backup-status" hidden></div>
 
     <main class="container">
         {% block content %}{% endblock %}
@@ -27,7 +36,7 @@
         <p>&copy; 2025 Aplikácia na sledovanie domácich nákladov</p>
     </footer>
 
-    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/app.js') }}?v={{ asset_ver }}"></script>
     {% block extra_js %}{% endblock %}
 </body>
 </html>

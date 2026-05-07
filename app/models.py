@@ -3,6 +3,7 @@
 Databázové modely
 """
 from app import db
+from app.category_areas import effective_area_label
 from datetime import datetime
 
 class Category(db.Model):
@@ -12,6 +13,7 @@ class Category(db.Model):
     icon = db.Column(db.String(20), default='📦')
     description = db.Column(db.String(255))
     parent_id = db.Column(db.Integer, db.ForeignKey('category.id'), nullable=True)
+    area = db.Column(db.String(80), nullable=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     
     # Hierarchické vzťahy
@@ -28,6 +30,8 @@ class Category(db.Model):
             'icon': self.icon,
             'description': self.description,
             'parent_id': self.parent_id,
+            'area': self.area,
+            'effective_area': effective_area_label(self),
             'is_subcategory': self.parent_id is not None
         }
         
@@ -72,3 +76,26 @@ class Expense(db.Model):
     
     def __repr__(self):
         return f'<Expense {self.amount}€ - {self.category.name} ({self.store})>'
+
+
+class Income(db.Model):
+    """Model príjmu"""
+    id = db.Column(db.Integer, primary_key=True)
+    amount = db.Column(db.Float, nullable=False)
+    description = db.Column(db.String(255))
+    source = db.Column(db.String(100))
+    date = db.Column(db.Date, nullable=False, default=datetime.utcnow)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'amount': float(self.amount),
+            'description': self.description,
+            'source': self.source,
+            'date': self.date.isoformat(),
+            'created_at': self.created_at.isoformat()
+        }
+
+    def __repr__(self):
+        return f'<Income {self.amount}€ - {self.source or "Príjem"}>'
