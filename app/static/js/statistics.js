@@ -8,6 +8,25 @@ const MONTH_LABELS = [
 /** Poradie oblastí vo výpise štatistiky; ostatné abecedne za nimi. */
 const AREA_STATS_ORDER = ['Nevyhnutné potreby', 'Chcenia', 'Investície', 'Rezerva', 'Nezaradené'];
 
+/**
+ * Počet kalendárnych mesiacov v roku `year`, ktoré sú už ukončené (posledný deň mesiaca < teraz).
+ * Minulý rok: 12. Budúci rok: 12 (delenie ako za celý rok v prehľade).
+ */
+function countCompletedCalendarMonthsInYear(year) {
+    const y = parseInt(year, 10);
+    if (Number.isNaN(y)) return 12;
+    const now = new Date();
+    const cy = now.getFullYear();
+    if (y < cy) return 12;
+    if (y > cy) return 12;
+    let n = 0;
+    for (let m = 1; m <= 12; m++) {
+        const endOfMonth = new Date(y, m, 0, 23, 59, 59, 999);
+        if (endOfMonth < now) n++;
+    }
+    return n;
+}
+
 let monthlyChart = null;
 
 function sortAreaStatsEntries(entries) {
@@ -133,6 +152,7 @@ async function loadStatistics() {
 function displaySummaryStats(stats) {
     const currentYear = new Date().getFullYear();
     const year = document.getElementById('statYear').value || currentYear;
+    const yearNum = parseInt(year, 10) || currentYear;
     
     // Celkové výdavky
     document.getElementById('totalExpenses').textContent = formatCurrency(stats.total);
@@ -148,9 +168,16 @@ function displaySummaryStats(stats) {
     });
     document.getElementById('expenseCount').textContent = count;
     
-    // Priemer na mesiac
-    const avg = stats.total / 12;
-    document.getElementById('monthlyAverage').textContent = formatCurrency(avg);
+    // Priemer na mesiac (deliteľ = ukončené mesiace v roku, nie vždy 12)
+    const completedMonths = countCompletedCalendarMonthsInYear(yearNum);
+    const divisor = Math.max(1, completedMonths);
+    const avg = stats.total / divisor;
+    const avgEl = document.getElementById('monthlyAverage');
+    avgEl.textContent = formatCurrency(avg);
+    avgEl.title =
+        yearNum === currentYear
+            ? `Priemer: súčet výdavkov / ${divisor} (ukončené mesiace v roku ${yearNum})`
+            : `Priemer: súčet výdavkov / ${divisor} mesiacov`;
 }
 
 function displayCategoryStats(categories, overallTotal = 0, sortMode = null) {
